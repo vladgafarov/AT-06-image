@@ -1,28 +1,43 @@
 from PIL import Image
 import numpy as np
-img = Image.open("img2.jpg")
-arr = np.array(img)
-a = len(arr)
-a1 = len(arr[1])
-i = 0
-while i < a - 1:
-    j = 0
-    while j < a1 - 1:
-        s = 0
-        for n in range(i, i + 10):
-            for n1 in range(j, j + 10):
-                n0 = arr[n][n1][0] // 3
-                n2 = arr[n][n1][1] // 3 
-                n3 = arr[n][n1][2] // 3
-                M = int(n0) + int(n2) + int(n3)
-                s += M
-        s = int(s // 100)
-        for n in range(i, i + 10):
-            for n1 in range(j, j + 10):
-                arr[n][n1][0] = int(s // 50) * 50
-                arr[n][n1][1] = int(s // 50) * 50
-                arr[n][n1][2] = int(s // 50) * 50
-        j = j + 10
-    i = i + 10
-res = Image.fromarray(arr)
-res.save('res.jpg')
+
+
+print('Путь до картинки')
+img = Image.open(input())
+
+print('Сохранить как')
+name = input()
+
+print('Градация серого')
+modifier = int(input())
+
+print('Размер блока')
+size = int(input())
+
+
+def get_image(image, image_size=10, gradation=5):
+    threshold = 255 // gradation
+    width = len(image)
+    height = len(image[0])
+    x = 0
+    while x < width:
+        y = 0
+        while y < height:
+            sector = image[x: x + image_size, y: y + image_size]
+            sum_avg = np.sum(sector) / 3
+            average_color = int(sum_avg // (image_size * image_size))
+            set_color(int(average_color // threshold) * threshold, image, image_size, x, y)
+            y += image_size
+        x += image_size
+    return Image.fromarray(np.uint8(image))
+
+
+def set_color(new_color, image, image_size, x, y):
+    for r in range(x, x + image_size):
+        for g in range(y, y + image_size):
+            for b in range(3):
+                image[r][g][b] = new_color
+
+
+image_arr = np.array(img).astype(int)
+get_image(image_arr, size, modifier).save(name)
